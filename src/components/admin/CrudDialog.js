@@ -50,7 +50,9 @@ const Grid = styled.div`
   display: grid;
   gap: 1rem;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  @media (max-width: 520px) { grid-template-columns: 1fr; }
+  @media (max-width: 520px) {
+    grid-template-columns: 1fr;
+  }
 `;
 
 const Field = styled.label`
@@ -60,7 +62,16 @@ const Field = styled.label`
   font-size: 0.72rem;
   font-weight: 700;
   gap: 0.4rem;
-  input, select { background: #f7f6ef; border: 1px solid #dfe3d8; border-radius: 0.25rem; color: #173c35; font: inherit; min-height: 2.5rem; padding: 0.55rem; }
+  input,
+  select {
+    background: #f7f6ef;
+    border: 1px solid #dfe3d8;
+    border-radius: 0.25rem;
+    color: #173c35;
+    font: inherit;
+    min-height: 2.5rem;
+    padding: 0.55rem;
+  }
 `;
 
 const Footer = styled.div`
@@ -71,10 +82,10 @@ const Footer = styled.div`
 `;
 
 const Button = styled.button`
-  background: ${(props) => props.$primary ? "#173c35" : "#e8eee5"};
+  background: ${(props) => (props.$primary ? "#173c35" : "#e8eee5")};
   border: 0;
   border-radius: 0.25rem;
-  color: ${(props) => props.$primary ? "#fffaf0" : "#173c35"};
+  color: ${(props) => (props.$primary ? "#fffaf0" : "#173c35")};
   cursor: pointer;
   font: inherit;
   font-size: 0.8rem;
@@ -83,21 +94,195 @@ const Button = styled.button`
 `;
 
 const fields = {
-  schemes: [["name", "Scheme name", "text"], ["potAmount", "Pot amount", "number"], ["durationMonths", "Duration (months)", "number"], ["memberCount", "Member count", "number"], ["commissionRate", "Commission rate (%)", "number"]],
-  groups: [["name", "Group name", "text"], ["startDate", "Start date", "date"]],
-  customers: [["username", "Username", "text"], ["displayName", "Display name", "text"], ["email", "Email", "email"], ["phone", "Phone", "tel"], ["password", "Temporary password", "password"]]
+  schemes: [
+    ["name", "Scheme name", "text"],
+    ["potAmount", "Pot amount", "number"],
+    ["durationMonths", "Duration (months)", "number"],
+    ["memberCount", "Member count", "number"],
+    ["commissionRate", "Commission rate (%)", "number"],
+  ],
+  groups: [
+    ["name", "Group name", "text"],
+    ["startDate", "Start date", "date"],
+  ],
+  customers: [
+    ["username", "Username", "text"],
+    ["displayName", "Display name", "text"],
+    ["email", "Email", "email"],
+    ["phone", "Phone", "tel"],
+    ["password", "Temporary password", "password"],
+  ],
 };
 
-export default function CrudDialog({ type, open, initialValue, onClose, onSubmit, pending, schemeOptions = [], customerOptions = [] }) {
+export default function CrudDialog({
+  type,
+  open,
+  initialValue,
+  onClose,
+  onSubmit,
+  pending,
+  schemeOptions = [],
+  customerOptions = [],
+}) {
   const [values, setValues] = useState(initialValue || {});
   if (!open) return null;
+  const selectedScheme = schemeOptions.find(
+    (scheme) => Number(scheme.id) === Number(values.schemeId),
+  );
+  const memberLimit = Number(selectedScheme?.memberCount);
+  const selectedMemberIds = values.memberIds || [];
+  const isAtMemberLimit =
+    Number.isFinite(memberLimit) && selectedMemberIds.length >= memberLimit;
   const title = `${initialValue ? "Edit" : "Create"} ${type === "schemes" ? "scheme" : type === "groups" ? "group" : "customer"}`;
   const submit = (event) => {
     event.preventDefault();
-    const payload = Object.fromEntries(Object.entries(values).filter(([, value]) => value !== "" && value !== undefined));
+    const selectedStatus = new FormData(event.currentTarget).get("status");
+    const payload = Object.fromEntries(
+      Object.entries(values).filter(
+        ([, value]) => value !== "" && value !== undefined,
+      ),
+    );
     if (payload.schemeId) payload.schemeId = Number(payload.schemeId);
     if (payload.memberIds) payload.memberIds = payload.memberIds.map(Number);
+    if (type === "groups") {
+      onSubmit(
+        initialValue
+          ? {
+              name: payload.name,
+              startDate: payload.startDate,
+              status: selectedStatus,
+              memberIds: payload.memberIds || [],
+            }
+          : {
+              schemeId: payload.schemeId,
+              memberIds: payload.memberIds,
+              name: payload.name,
+              startDate: payload.startDate,
+            },
+      );
+      return;
+    }
     onSubmit(payload);
   };
-  return <Backdrop onMouseDown={(event) => event.target === event.currentTarget && onClose()}><Dialog onSubmit={submit}><Heading><Title>{title}</Title><CloseButton type="button" onClick={onClose} aria-label="Close"><Close fontSize="small" /></CloseButton></Heading><Grid>{type === "groups" && <><Field>Scheme<select required={!initialValue} disabled={Boolean(initialValue)} value={values.schemeId || ""} onChange={(event) => setValues((current) => ({ ...current, schemeId: event.target.value }))}><option value="">Select a scheme</option>{schemeOptions.map((scheme) => <option key={scheme.id} value={scheme.id}>{scheme.name} ({scheme.memberCount} members)</option>)}</select></Field>{!initialValue && <Field>Members<select multiple value={values.memberIds || []} onChange={(event) => setValues((current) => ({ ...current, memberIds: [...event.target.selectedOptions].map((option) => option.value) }))}>{customerOptions.map((customer) => <option key={customer.id} value={customer.id}>{customer.displayName || customer.username}</option>)}</select></Field>}</>}{fields[type].map(([key, label, inputType]) => <Field key={key}>{label}<input min={type === "schemes" && key === "memberCount" ? 5 : undefined} required={!initialValue && key !== "password"} type={inputType} value={values[key] || ""} onChange={(event) => setValues((current) => ({ ...current, [key]: event.target.value }))} /></Field>)}{type === "groups" && initialValue && <Field>Status<select value={values.status || "FORMING"} onChange={(event) => setValues((current) => ({ ...current, status: event.target.value }))}><option value="FORMING">Forming</option><option value="RUNNING">Running</option><option value="BIDDING_OPEN">Bidding open</option><option value="COMPLETED">Completed</option><option value="CLOSED">Closed</option></select></Field>}</Grid><Footer><Button type="button" onClick={onClose}>Cancel</Button><Button $primary type="submit" disabled={pending}>{pending ? "Saving..." : "Save"}</Button></Footer></Dialog></Backdrop>;
+  return (
+    <Backdrop
+      onMouseDown={(event) => event.target === event.currentTarget && onClose()}
+    >
+      <Dialog onSubmit={submit}>
+        <Heading>
+          <Title>{title}</Title>
+          <CloseButton type="button" onClick={onClose} aria-label="Close">
+            <Close fontSize="small" />
+          </CloseButton>
+        </Heading>
+        <Grid>
+          {type === "groups" && (
+            <>
+              <Field>
+                Scheme
+                <select
+                  required={!initialValue}
+                  disabled={Boolean(initialValue)}
+                  value={values.schemeId || ""}
+                  onChange={(event) =>
+                    setValues((current) => ({
+                      ...current,
+                      schemeId: event.target.value,
+                    }))
+                  }
+                >
+                  <option value="">Select a scheme</option>
+                  {schemeOptions.map((scheme) => (
+                    <option key={scheme.id} value={scheme.id}>
+                      {scheme.name} ({scheme.memberCount} members)
+                    </option>
+                  ))}
+                </select>
+              </Field>
+              <Field>
+                Members
+                <select
+                  multiple
+                  value={selectedMemberIds}
+                  onChange={(event) =>
+                    setValues((current) => ({
+                      ...current,
+                      memberIds: [...event.target.selectedOptions].map(
+                        (option) => option.value,
+                      ),
+                    }))
+                  }
+                >
+                  {customerOptions.map((customer) => {
+                    const selected = selectedMemberIds.map(String).includes(String(customer.id));
+                    return (
+                      <option
+                        disabled={!selected && isAtMemberLimit}
+                        key={customer.id}
+                        value={customer.id}
+                      >
+                        {customer.displayName || customer.username}
+                      </option>
+                    );
+                  })}
+                </select>
+                {Number.isFinite(memberLimit) && (
+                  <small>{selectedMemberIds.length} of {memberLimit} members selected</small>
+                )}
+              </Field>
+            </>
+          )}
+          {fields[type].map(([key, label, inputType]) => (
+            <Field key={key}>
+              {label}
+              <input
+                min={
+                  type === "schemes" && key === "memberCount" ? 5 : undefined
+                }
+                required={!initialValue && key !== "password"}
+                type={inputType}
+                value={values[key] || ""}
+                onChange={(event) =>
+                  setValues((current) => ({
+                    ...current,
+                    [key]: event.target.value,
+                  }))
+                }
+              />
+            </Field>
+          ))}
+          {type === "groups" && initialValue && (
+            <Field>
+              Status
+              <select
+                name="status"
+                value={values.status || "FORMING"}
+                onChange={(event) =>
+                  setValues((current) => ({
+                    ...current,
+                    status: event.target.value,
+                  }))
+                }
+              >
+                <option value="FORMING">Forming</option>
+                <option value="ACTIVE">Active</option>
+                <option value="RUNNING">Running</option>
+                <option value="BIDDING_OPEN">Bidding open</option>
+                <option value="COMPLETED">Completed</option>
+                <option value="CLOSED">Closed</option>
+              </select>
+            </Field>
+          )}
+        </Grid>
+        <Footer>
+          <Button type="button" onClick={onClose}>
+            Cancel
+          </Button>
+          <Button $primary type="submit" disabled={pending}>
+            {pending ? "Saving..." : "Save"}
+          </Button>
+        </Footer>
+      </Dialog>
+    </Backdrop>
+  );
 }

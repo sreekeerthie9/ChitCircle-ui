@@ -22,11 +22,14 @@ const groups = `${baseURL}groups`;
 const users = `${baseURL}users`;
 const cycles = `${baseURL}cycles`;
 const payments = `${baseURL}payments`;
+const payouts = `${baseURL}payouts`;
 const analytics = `${baseURL}analytics/summary`;
 const customerMemberships = `${baseURL}customer/memberships`;
 const customerBids = `${baseURL}customer/bids`;
 const customerClaims = `${baseURL}customer/claims`;
 const customerPayments = `${baseURL}customer/payments`;
+const kyc = `${baseURL}kyc`;
+const kycDocuments = `${baseURL}kyc/documents`;
 const customerCycles = `${baseURL}customer/cycles`;
 const notifications = `${baseURL}notifications`;
 const support = `${baseURL}support/tickets`;
@@ -43,11 +46,14 @@ const APIConstants = {
   users,
   cycles,
   payments,
+  payouts,
   analytics,
   customerMemberships,
   customerBids,
   customerClaims,
   customerPayments,
+  kyc,
+  kycDocuments,
   customerCycles,
   notifications,
   support,

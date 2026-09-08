@@ -20,6 +20,14 @@ export default function NotificationsPage() {
   const { authConfig } = useAuthContext();
   const query = useApiQuery({ key: "notifications", url: APIConstants.notifications, authConfig });
   const queryClient = useQueryClient();
+  const notificationMessage = (payload) => {
+    if (!payload) return "You have a new account update.";
+    try {
+      return JSON.parse(payload).message || payload;
+    } catch {
+      return payload;
+    }
+  };
   const markRead = async (id) => { await api({ url: `${APIConstants.notifications}/${id}/read`, method: "POST" }, authConfig); await queryClient.invalidateQueries({ queryKey: ["notifications"] }); };
-  return <Shell><Title><NotificationsNoneOutlined fontSize="small" /> Notifications</Title><List>{(query.data || []).map((item) => <Item key={item.id} $read={Boolean(item.readAt)}><Type>{item.type.replaceAll("_", " ").toLowerCase()}</Type><Body>{item.payload || "You have a new account update."}</Body>{!item.readAt && <Button onClick={() => markRead(item.id)}>Mark as read</Button>}</Item>)}</List></Shell>;
+  return <Shell><Title><NotificationsNoneOutlined fontSize="small" /> Notifications</Title><List>{(query.data || []).map((item) => <Item key={item.id} $read={Boolean(item.readAt)}><Type>{item.type.replaceAll("_", " ").toLowerCase()}</Type><Body>{notificationMessage(item.payload)}</Body>{!item.readAt && <Button onClick={() => markRead(item.id)}>Mark as read</Button>}</Item>)}</List></Shell>;
 }

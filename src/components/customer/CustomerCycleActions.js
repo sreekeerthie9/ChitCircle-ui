@@ -1,9 +1,12 @@
 "use client";
 
 import { useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import styled from "styled-components";
+import { MESSAGE_TYPE } from "@/constants/Common";
 import APIConstants from "@/constants/APIConstants";
 import { useAuthContext } from "@/contexts/AuthContext";
+import { useSnackbar } from "@/contexts/SnackbarProvider";
 import { useApiQuery } from "@/hooks/useApi";
 import { api } from "@/utils/APIMethods";
 
@@ -25,13 +28,23 @@ const Status = styled.span`color: #317052; font-size: 0.75rem; font-weight: 700;
 
 export default function CustomerCycleActions() {
   const { authConfig } = useAuthContext();
+  const queryClient = useQueryClient();
+  const showSnackbar = useSnackbar();
   const query = useApiQuery({ key: "customer-open-cycles", url: APIConstants.customerCycles, authConfig });
   const [notes, setNotes] = useState({});
   const openCycles = (query.data || []).filter((cycle) => cycle.status === "BIDDING_OPEN");
 
   const submitClaim = async (cycle) => {
-    await api({ url: `${APIConstants.customerCycles}/${cycle.id}/claims`, method: "POST", body: { note: notes[cycle.id] || "" } }, authConfig);
-    await query.refetch();
+    try {
+      await api({ url: `${APIConstants.customerCycles}/${cycle.id}/claims`, method: "POST", body: { note: notes[cycle.id] || "" } }, authConfig);
+      await Promise.all([
+        query.refetch(),
+        queryClient.invalidateQueries({ queryKey: ["customer-claims"] }),
+      ]);
+      showSnackbar("Claim submitted successfully.", MESSAGE_TYPE.success);
+    } catch (error) {
+      showSnackbar(error?.message || "Unable to submit claim.", MESSAGE_TYPE.error);
+    }
   };
 
   return <Section><Heading><div><Title>Open monthly chits</Title><Meta>{query.isLoading ? "Loading open claim windows..." : "Request this month's chit fund with an optional comment."}</Meta></div></Heading>{query.isError ? <Meta>Unable to load open cycles.</Meta> : openCycles.length === 0 ? <Meta>No claim windows are open right now.</Meta> : <Rows>{openCycles.map((cycle) => <Row key={cycle.id}><div><strong>{cycle.groupName}</strong><Meta>{cycle.schemeName} · Cycle {cycle.cycleNumber} · ₹{Number(cycle.potAmount).toLocaleString("en-IN")}</Meta></div><Field placeholder="Optional comment" disabled={cycle.hasClaim} value={notes[cycle.id] || ""} onChange={(event) => setNotes((current) => ({ ...current, [cycle.id]: event.target.value }))} />{cycle.hasClaim ? <Status>Claim submitted</Status> : <Button type="button" onClick={() => submitClaim(cycle)}>Request chit</Button>}</Row>)}</Rows>}</Section>;

@@ -40,7 +40,8 @@ export const fetchRefreshToken = async ({
   })
     .then(async (refreshTokenResponse) => {
       if (refreshTokenResponse.status === 200) {
-        const responseData = await refreshTokenResponse.json();
+        const responseBody = await refreshTokenResponse.json();
+        const responseData = responseBody?.success ? responseBody.data : responseBody;
         if (typeof global !== "undefined") {
           globalThis.authDispatch({
             type: "onRefresh",
@@ -90,7 +91,8 @@ const errorResponses = [
 
 async function checkError(response) {
   if (errorResponses.includes(response.status)) {
-    throw await response.json();
+    const payload = await response.json();
+    throw payload?.error || payload;
   }
   return response;
 }
@@ -138,6 +140,10 @@ export const api = async (
       if (responseType === "text") {
         return response.text();
       }
-      return response.json();
+      if (responseType === "blob") {
+        return response.blob();
+      }
+      const payload = await response.json();
+      return payload?.success ? payload.data : payload;
     });
 };
