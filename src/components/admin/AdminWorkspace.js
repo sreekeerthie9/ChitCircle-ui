@@ -25,6 +25,7 @@ import AdminCycleReview from "./AdminCycleReview";
 import DeleteConfirmationDialog from "./DeleteConfirmationDialog";
 import PaymentDialog from "./PaymentDialog";
 import KycReview from "./KycReview";
+import { FinancialRiskButton } from "./FinancialRiskModal";
 import {
   AdvancedSchemeDialog,
   BulkSchemeUploadDialog,
@@ -1059,7 +1060,7 @@ function DataTable({ type }) {
                         </SoftButton>
                       )}
                       {type === "customers" ? (
-                        <><KycReview username={row.code} /><SoftButton onClick={() => remove(row)}>Deactivate</SoftButton></>
+                        <><KycReview username={row.code} /><FinancialRiskButton username={row.code} /><SoftButton onClick={() => remove(row)}>Deactivate</SoftButton></>
                       ) : (
                         <SoftButton onClick={() => remove(row)}>
                           Delete

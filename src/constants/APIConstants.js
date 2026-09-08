@@ -30,6 +30,7 @@ const customerClaims = `${baseURL}customer/claims`;
 const customerPayments = `${baseURL}customer/payments`;
 const kyc = `${baseURL}kyc`;
 const kycDocuments = `${baseURL}kyc/documents`;
+const financialRisk = `${baseURL}users`;
 const customerCycles = `${baseURL}customer/cycles`;
 const notifications = `${baseURL}notifications`;
 const support = `${baseURL}support/tickets`;
@@ -54,6 +55,7 @@ const APIConstants = {
   customerPayments,
   kyc,
   kycDocuments,
+  financialRisk,
   customerCycles,
   notifications,
   support,
