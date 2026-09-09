@@ -1,18 +1,18 @@
-export const envMap = {
+﻿export const envMap = {
   local: "LOCAL",
   ngrok: "NGROK",
   development: "LOCAL",
   production: "PROD"
 };
 
-const DODOOH_SERVICE_URLS = {
+const CHITCIRCLE_SERVICE_URLS = {
   [envMap.local]: "http://localhost:8080/api/",
   [envMap.production]: "https://app.signagemonk.com/api/"
 };
 
-export const PROJECT_ENV = envMap[process.env.NEXT_APP_URL_ENV] || envMap.local;
+export const PROJECT_ENV = envMap[process.env.NEXT_PUBLIC_URL_ENV] || envMap.local;
 
-const baseURL = DODOOH_SERVICE_URLS[PROJECT_ENV];
+const baseURL = CHITCIRCLE_SERVICE_URLS[PROJECT_ENV];
 
 const login = `${baseURL}auth/login`;
 const refreshToken = `${baseURL}auth/refresh`;
@@ -27,6 +27,7 @@ const analytics = `${baseURL}analytics/summary`;
 const customerMemberships = `${baseURL}customer/memberships`;
 const customerBids = `${baseURL}customer/bids`;
 const customerClaims = `${baseURL}customer/claims`;
+const customerPayouts = `${baseURL}customer/payouts`;
 const customerPayments = `${baseURL}customer/payments`;
 const kyc = `${baseURL}kyc`;
 const kycDocuments = `${baseURL}kyc/documents`;
@@ -37,6 +38,7 @@ const support = `${baseURL}support/tickets`;
 const audit = `${baseURL}superadmin/audit`;
 const platformSummary = `${baseURL}superadmin/summary`;
 const platformUsers = `${baseURL}superadmin/users`;
+const superadminKycDocuments = `${baseURL}kyc/review/documents`;
 
 const APIConstants = {
   login,
@@ -52,6 +54,7 @@ const APIConstants = {
   customerMemberships,
   customerBids,
   customerClaims,
+  customerPayouts,
   customerPayments,
   kyc,
   kycDocuments,
@@ -61,7 +64,9 @@ const APIConstants = {
   support,
   audit,
   platformSummary,
-  platformUsers
+  platformUsers,
+  createAdmin: platformUsers,
+  superadminKycDocuments
 };
 
 export default APIConstants;

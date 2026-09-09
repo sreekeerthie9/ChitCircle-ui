@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import {
   AccountCircleOutlined,
@@ -19,11 +19,10 @@ import { api } from "@/utils/APIMethods";
 
 const items = [
   ["/dashboard", "My overview", GroupsOutlined],
-  ["/bids", "Bids & claims", EventNoteOutlined],
+  ["/bids", "Claims & history", EventNoteOutlined],
   ["/payments", "Payments", PaymentsOutlined],
   ["/profile", "Profile & KYC", AccountCircleOutlined],
-  ["/notifications", "Notifications", NotificationsNoneOutlined],
-  ["/support", "Support", SupportAgentOutlined]
+  ["/notifications", "Notifications", NotificationsNoneOutlined]
 ];
 
 const Root = styled.div`background: #f5f1e8; display: flex; min-height: 100vh;`;
@@ -57,3 +56,4 @@ export default function CustomerShell({ children }) {
   };
   return <Root><Sidebar><Brand>MS ChitCircle<BrandMark>Member portal</BrandMark></Brand><Nav>{items.map(([href, label, Icon]) => <NavLink href={href} key={href} aria-current={pathname === href ? "page" : undefined}><Icon fontSize="small" /><span>{label}</span></NavLink>)}</Nav></Sidebar><Main><Topbar><Label>Member portal</Label><User role="button" tabIndex={0} aria-label="View profile" title="View profile" onClick={() => router.push("/profile")} onKeyDown={(event) => { if (event.key === "Enter" || event.key === " ") router.push("/profile"); }}><Avatar>{authConfig?.username?.slice(0, 1)?.toUpperCase() || "M"}</Avatar><span>{authConfig?.username || "Member"}</span><button type="button" aria-label="Log out" title="Log out" onClick={(event) => { event.stopPropagation(); logout(); }}><LogoutOutlined fontSize="small" /></button></User></Topbar><Content>{children}</Content></Main></Root>;
 }
+

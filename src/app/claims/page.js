@@ -1,5 +1,4 @@
-import CustomerRecords from "@/components/customer/CustomerRecords";
-
+﻿import { redirect } from "next/navigation";
 export default function ClaimsPage() {
-  return <CustomerRecords type="claims" />;
+  redirect("/bids");
 }

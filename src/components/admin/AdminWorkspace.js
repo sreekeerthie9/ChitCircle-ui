@@ -302,6 +302,22 @@ const SoftButton = styled(PrimaryButton)`
   }
 `;
 
+const ActionCell = styled.div`
+  display: grid;
+  gap: 0.5rem;
+  min-width: 12.5rem;
+`;
+
+const ActionRow = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  > button {
+    min-height: 2.25rem;
+    padding: 0.5rem 0.65rem;
+  }
+`;
+
 const StatGrid = styled.div`
   display: grid;
   gap: 1rem;
@@ -1051,20 +1067,21 @@ function DataTable({ type }) {
                   ))}
                   {crudSupported && (
                     <td>
-                      <SoftButton onClick={() => openEdit(row)}>
-                        Edit
-                      </SoftButton>
-                      {type === "schemes" && (
-                        <SoftButton onClick={() => setAdvancedScheme(row)}>
-                          Advanced
-                        </SoftButton>
-                      )}
                       {type === "customers" ? (
-                        <><KycReview username={row.code} /><FinancialRiskButton username={row.code} /><SoftButton onClick={() => remove(row)}>Deactivate</SoftButton></>
+                        <ActionCell>
+                          <ActionRow>
+                            <SoftButton onClick={() => openEdit(row)}>Edit</SoftButton>
+                            <FinancialRiskButton username={row.code} />
+                            <SoftButton onClick={() => remove(row)}>Deactivate</SoftButton>
+                          </ActionRow>
+                          <KycReview username={row.code} />
+                        </ActionCell>
                       ) : (
-                        <SoftButton onClick={() => remove(row)}>
-                          Delete
-                        </SoftButton>
+                        <ActionRow>
+                          <SoftButton onClick={() => openEdit(row)}>Edit</SoftButton>
+                          {type === "schemes" && <SoftButton onClick={() => setAdvancedScheme(row)}>Advanced</SoftButton>}
+                          <SoftButton onClick={() => remove(row)}>Delete</SoftButton>
+                        </ActionRow>
                       )}
                     </td>
                   )}

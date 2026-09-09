@@ -74,6 +74,12 @@ const Field = styled.label`
   }
 `;
 
+const ValidationError = styled.span`
+  color: #a34c2e;
+  font-size: 0.68rem;
+  font-weight: 600;
+`;
+
 const Footer = styled.div`
   display: flex;
   gap: 0.7rem;
@@ -99,7 +105,7 @@ const fields = {
     ["potAmount", "Pot amount", "number"],
     ["durationMonths", "Duration (months)", "number"],
     ["memberCount", "Member count", "number"],
-    ["commissionRate", "Commission rate (%)", "number"],
+    ["commissionRate", "Commission rate (%) (optional)", "number"],
   ],
   groups: [
     ["name", "Group name", "text"],
@@ -114,6 +120,17 @@ const fields = {
   ],
 };
 
+const validation = {
+  email: {
+    regex: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+    message: "Enter a valid email address, for example name@example.com.",
+  },
+  phone: {
+    regex: /^(?:\+91[ -]?)?[6-9]\d{9}$/,
+    message: "Enter a valid 10-digit Indian mobile number, optionally prefixed with +91.",
+  },
+};
+
 export default function CrudDialog({
   type,
   open,
@@ -125,6 +142,7 @@ export default function CrudDialog({
   customerOptions = [],
 }) {
   const [values, setValues] = useState(initialValue || {});
+  const [errors, setErrors] = useState({});
   if (!open) return null;
   const selectedScheme = schemeOptions.find(
     (scheme) => Number(scheme.id) === Number(values.schemeId),
@@ -133,9 +151,32 @@ export default function CrudDialog({
   const selectedMemberIds = values.memberIds || [];
   const isAtMemberLimit =
     Number.isFinite(memberLimit) && selectedMemberIds.length >= memberLimit;
-  const title = `${initialValue ? "Edit" : "Create"} ${type === "schemes" ? "scheme" : type === "groups" ? "group" : "customer"}`;
+  const validateField = (key, value) => {
+    const rule = validation[key];
+    if (!rule || !value) return "";
+    return rule.regex.test(value.trim()) ? "" : rule.message;
+  };
+  const updateField = (key, value) => {
+    setValues((current) => ({ ...current, [key]: value }));
+    if (validation[key]) {
+      setErrors((current) => ({
+        ...current,
+        [key]: validateField(key, value),
+      }));
+    }
+  };
+  const title = `${initialValue ? "Edit" : "Create"} ${type === "schemes" ? "scheme" : type === "groups" ? "group" : "user"}`;
   const submit = (event) => {
     event.preventDefault();
+    const contactErrors = Object.fromEntries(
+      Object.keys(validation)
+        .map((key) => [key, validateField(key, values[key] || "")])
+        .filter(([, message]) => message),
+    );
+    if (Object.keys(contactErrors).length) {
+      setErrors(contactErrors);
+      return;
+    }
     const selectedStatus = new FormData(event.currentTarget).get("status");
     const payload = Object.fromEntries(
       Object.entries(values).filter(
@@ -236,19 +277,29 @@ export default function CrudDialog({
             <Field key={key}>
               {label}
               <input
+                inputMode={key === "phone" ? "tel" : undefined}
                 min={
                   type === "schemes" && key === "memberCount" ? 5 : undefined
                 }
-                required={!initialValue && key !== "password"}
-                type={inputType}
-                value={values[key] || ""}
-                onChange={(event) =>
-                  setValues((current) => ({
-                    ...current,
-                    [key]: event.target.value,
-                  }))
+                required={
+                  !initialValue &&
+                  key !== "password" &&
+                  !(type === "schemes" && key === "commissionRate")
                 }
+                type={key === "email" ? "text" : inputType}
+                value={values[key] || ""}
+                aria-invalid={Boolean(errors[key])}
+                onChange={(event) => updateField(key, event.target.value)}
+                onBlur={(event) => {
+                  if (validation[key]) {
+                    setErrors((current) => ({
+                      ...current,
+                      [key]: validateField(key, event.target.value),
+                    }));
+                  }
+                }}
               />
+              {errors[key] && <ValidationError>{errors[key]}</ValidationError>}
             </Field>
           ))}
           {type === "groups" && initialValue && (
