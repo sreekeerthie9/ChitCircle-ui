@@ -1,0 +1,16 @@
+{
+  "hosting": {
+    "site": "chitcircle-prod",
+    "public": "public",
+    "cleanUrls": true,
+    "rewrites": [
+      {
+        "source": "**",
+        "run": {
+          "serviceId": "chitcircle-frontend",
+          "region": "asia-south1"
+        }
+      }
+    ]
+  }
+}

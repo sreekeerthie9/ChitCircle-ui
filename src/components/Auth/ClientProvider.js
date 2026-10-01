@@ -12,19 +12,22 @@ function RoleRouter({ children }) {
   const pathname = usePathname();
   const router = useRouter();
   const { authConfig, isAuthenticated } = useAuthContext();
+  const isLandingPage = pathname === "/";
   const isAuthPage = pathname?.startsWith("/login") || pathname?.startsWith("/register");
+  const isPublicPage = isLandingPage || isAuthPage;
   const section = pathname?.split("/")[1] || "dashboard";
   const role = String(authConfig?.role || "").toUpperCase();
   const Shell = role.includes("SUPERADMIN") ? SuperAdminShell : role.includes("CUSTOMER") ? CustomerShell : AdminShell;
 
   useEffect(() => {
-    if (!isAuthPage && !isAuthenticated) {
+    if (!isPublicPage && !isAuthenticated) {
       router.replace("/login");
     }
-  }, [isAuthenticated, isAuthPage, router]);
+  }, [isAuthenticated, isPublicPage, router]);
 
-  if (!isAuthPage && !isAuthenticated) return null;
-  return isAuthPage ? children : <Shell section={section}>{children}</Shell>;
+  if (!isPublicPage && !isAuthenticated) return null;
+  if (isPublicPage) return children;
+  return <Shell section={section}>{children}</Shell>;
 }
 
 export default function ClientProvider({ children }) {

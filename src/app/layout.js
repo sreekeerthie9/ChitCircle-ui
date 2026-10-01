@@ -4,7 +4,7 @@ import { themes } from "@/constants/Themes";
 import StyledComponentsRegistry from "@/contexts/StyledComponentsRegistry";
 import "./globals.css";
 
-const APP_URL = "https://app.mschitcircle.com";
+const APP_URL = "https://ms.chitcircle.com";
 
 export const viewport = {
   themeColor: "#000000",
@@ -19,7 +19,7 @@ export const metadata = {
     template: "%s | MS ChitCircle"
   },
   description:
-    "Manage your digital signage network from one powerful dashboard. Control devices, playlists, schedules, media, and content across your entire display fleet.",
+    "Manage your ChitCircle network from one powerful dashboard. Control schemes, cycles, groups, members, and analytics across your entire display fleet.",
   keywords: [
     "chit fund management",
     "chit circle management",

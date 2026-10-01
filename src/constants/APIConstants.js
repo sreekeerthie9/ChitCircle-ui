@@ -7,10 +7,10 @@
 
 const CHITCIRCLE_SERVICE_URLS = {
   [envMap.local]: "http://localhost:8080/api/",
-  [envMap.production]: "https://app.signagemonk.com/api/"
+  [envMap.production]: "https://chitcircle-backend-291533875234.asia-south1.run.app/api/"
 };
 
-export const PROJECT_ENV = envMap[process.env.NEXT_PUBLIC_URL_ENV] || envMap.local;
+export const PROJECT_ENV = envMap[process.env.NEXT_PUBLIC_URL_ENV] || envMap.production;
 
 const baseURL = CHITCIRCLE_SERVICE_URLS[PROJECT_ENV];
 

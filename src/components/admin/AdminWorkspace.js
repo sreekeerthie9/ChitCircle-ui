@@ -752,7 +752,6 @@ function DataTable({ type }) {
             members: `${
               group.memberCount ?? group.members?.length ?? group.memberIds?.length ?? 0
             } members`,
-            collected: "Not available",
             due: group.startDate || "Not scheduled",
             startDate: group.startDate || "",
             status: group.status || "FORMING",
@@ -763,10 +762,8 @@ function DataTable({ type }) {
               name: user.displayName || user.username,
               code: user.username,
               phone: user.phone || "Not provided",
-              groups: "Not available",
               kyc: String(user.kycStatus || "NOT_STARTED").replaceAll("_", " "),
-              dues: "Not available",
-              status: user.active ? "Good standing" : "Inactive",
+              status: user.active ? "Active" : "Inactive",
               displayName: user.displayName,
               email: user.email,
             }))
@@ -795,7 +792,6 @@ function DataTable({ type }) {
                   cycle.selectedMember?.displayName ||
                   cycle.selectedMember?.username ||
                   "Pending decision",
-                payout: "Not available",
                 status: String(cycle.status || "SCHEDULED").replaceAll(
                   "_",
                   " ",
